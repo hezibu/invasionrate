@@ -18,7 +18,8 @@ count_pi  <- function(S,i,params,const){
 count_p <- function(i,params,const){
   # This function calculates the value p from Solow and Costello (2004)
   # It uses matrix coding for efficiency
-  require(matrixStats)
+  library(matrixStats)
+  library(pracma)
   
   S <- repmat(c(1:i),i,1)
   
@@ -80,12 +81,28 @@ count_lambda <- function(N,params,const){
   return(lambda)
 }
 
+sim <- function(N,params,const){
+  # This function calculates lambda from Solow and Costello, 2004.
+  # params is a vector of parameters
+  lambda<-vector(mode = "numeric",length = N)
+  for(i in 1:N){
+    S=c(1:i)
+    Am = count_m(S,params,const) 
+    Ap = count_p(i,params,const)
+    Yt = rbinom(Am,1,Ap)
+    lambda[i] = round(sum(Am * Conj(t(Yt))))
+  }
+  
+  return(lambda)
+}
 
-set_params_to_optimize <- function(numeric_vector,parameters){
+
+
+set_params_to_optimize <- function(numeric_vector,parameters = c("beta0","beta1","gama0","gama1","gama2")){
   return(set_names(x = numeric_vector,nm = parameters))
 }
 
-set_constant_params <- function(numeric_vector,parameters){
+set_constant_params <- function(numeric_vector,parameters = c("beta0","beta1","gama0","gama1","gama2")){
   return(set_names(x = numeric_vector,nm = parameters))
 }
 
