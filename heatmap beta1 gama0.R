@@ -100,7 +100,6 @@ tibble(beta1 = unlist(beta1.rate),
       geom_line()
     }
 
-#not finished yet
 did_optim_succeed_high_low <- function(opt,params){
   simulated.params <- as.data.frame(params) %>% 
     rownames_to_column()

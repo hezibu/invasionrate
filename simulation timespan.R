@@ -173,15 +173,15 @@ optim(fn = count_log_like,par = set_params_to_optimize(c(-1,0.02,-1,0,0)),
 
 timespan.heatmap.results.list[[1]][[1]][[2]]
 
-heatmap.result.dataframe <- data_frame(beta1 = rep(seq(-0.01,0.02,by = 0.0010),10*100),
-       timespan = rep(timespan.intervals[1:10],31*100),
-       index = rep(1:100,each = 31*10)) %>% 
+heatmap.result.dataframe <- data_frame(beta1 = rep(seq(-0.01,0.02,by = 0.0010),4*100),
+       timespan = rep(timespan.intervals[c(1,4,6,10)],31*100),
+       index = rep(1:100,each = 31*4)) %>% 
   arrange(beta1,timespan,index)
 
 index <- 1
 list.r <- list()
 for (i in 1:31){
-  for (j in 1:10){
+  for (j in 1:4){
     for (k in 1:100){
       list.r[[index]] <- try(silent = T,did_optim_succeed(params = set_params_to_optimize(c(-1,seq(-0.01,0.02,by = 0.0010)[i],-1,0,0)),
                             timespan.heatmap.results.list %>% .[[i]] %>% .[[j]] %>% .[[k]]))
@@ -192,9 +192,11 @@ for (i in 1:31){
 
 
 
-list.r[[1003]]
+list.r[[800]]
 
-heatmap.result.dataframe$success <- list.r
+timespan.heatmap.results.list[[13]][[4]][[1]]
+
+heatmap.result.dataframe$success <- NULL
 
 timespan.correct.rate <- map(list.r,6) %>% 
   map(2)
@@ -211,10 +213,12 @@ heatmap.result.dataframe <- unnest(heatmap.result.dataframe,beta1correct)
 
 
 
-heatmap.result.dataframe %>% group_by(beta1,timespan) %>% summarize(correctrate = sum(beta1correct,na.rm = T)/100) %>% 
-  print(n=Inf)
-
-unlist(heatmap.result.dataframe$beta1correct)
+heatmap.result.dataframe %>% group_by(beta1,timespan) %>% 
+  summarize(correctrate = sum(beta1correct,na.rm = T)/100) %>%  {
+    ggplot(.)+
+      aes(x=beta1,y=as.factor(timespan))+
+      geom_tile(aes(fill=correctrate))
+  }
 
 
 
