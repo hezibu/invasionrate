@@ -6,4 +6,4 @@ is_inst <- function(pkg) {
 if (!is_inst("pacman")) {install.packages("pacman")}
 library("pacman")
 
-p_load(tidyverse,pbapply,optimx,purrr,matrixStats,pracma,magrittr)
+p_load(tidyverse,pbapply,optimx,purrr,matrixStats,pracma,magrittr,doParallel)
