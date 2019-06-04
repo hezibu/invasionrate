@@ -100,7 +100,6 @@ tibble(beta1 = unlist(beta1.rate),
       geom_line()
     }
 
-#not finished yet
 did_optim_succeed_high_low <- function(opt,params){
   simulated.params <- as.data.frame(params) %>% 
     rownames_to_column()
@@ -112,21 +111,57 @@ did_optim_succeed_high_low <- function(opt,params){
     left_join(simulated.params,by = "par") %>% 
     mutate(correct = (true <= `95% Upper bound` & 
                         true >= `95% Lower bound`),
-           estimate_bias = ) %>% 
-    select(par,`95% Lower bound`,ML,`95% Upper bound`,true,correct)
+           se = (`95% Upper bound` - ML)/1.96,
+           estimate_bias = (true - ML)/se) %>% 
+    select(par,true,estimate_bias)
   return(out)
 }
 
 
+heatmap.high.low <- purrr::map2(list.of.opts,list.of.params, function(x,y) try(did_optim_succeed_high_low(x,y),silent = T))
 
-param.matrix <- bind_rows(lapply(map(heatmap.results.list,3)[[1]],function(x) try(get_parameter_se(x),silent = T))[
-  sapply(lapply(map(heatmap.results.list,3)[[1]],function(x) try(get_parameter_se(x),silent = T)),class) != "try-error"
-  ],.id = "column_label") %>% 
-  group_by(column_label) %>%
-  filter(row_number()==1) %>%
-  ungroup() %>% 
-  select(-1)
+beta0.bias <- purrr::map(heatmap.high.low,3) %>% map(1)
+beta1.bias <- purrr::map(heatmap.high.low,3) %>% map(2)
+gama0.bias <- purrr::map(heatmap.high.low,3) %>% map(3)
+gama1.bias <- purrr::map(heatmap.high.low,3) %>% map(4)
+gama2.bias <- purrr::map(heatmap.high.low,3) %>% map(5)
 
-params.true <-  set_params_to_optimize(c(-1,as.numeric(colMeans(map(heatmap.results.list,2)[[1]][[1]])[2:3]),0,0))
+beta1.true <- purrr::map(heatmap.high.low,2) %>% map(2)
+gama0.true <- purrr::map(heatmap.high.low,2) %>% map(3)
 
-SimDesign::bias(estimate = param.matrix,parameter = params.true)
+data.for.bias.map <- tibble(beta1 = unlist(beta1.true),
+                            gama0 = unlist(gama0.true),
+                            beta0.bias = unlist(beta0.bias),
+                            beta1.bias = unlist(beta1.bias),
+                            gama0.bias = unlist(gama0.bias),
+                            gama1.bias = unlist(gama1.bias),
+                            gama2.bias = unlist(gama2.bias))
+
+data.for.bias.map %>% 
+  #mutate(level = cut(beta1.bias,breaks = c(-Inf,-5,-1.96,1.96,5,Inf),
+   #                  labels = c("Very Under","Under","Correct","Over","Very Over"))) %>% 
+  group_by(beta1,gama0) %>% nest() %>% 
+  mutate(correlation = map(data,function(x) cor.test(x$gama2.bias,x$beta1.bias)[[4]])) %>% 
+  unnest(correlation) %>% unnest(data) %>% 
+         ggplot()+
+  aes(x = beta1,y = gama0)+
+  geom_tile(aes(fill = correlation))
+
+
+data.for.bias.map %>% 
+  group_by(beta1,gama0) %>% 
+  summarize(mean.bias = mean(beta1.bias,na.rm = T)) %>% 
+  mutate(bias = cut(mean.bias,breaks = c(-Inf,-1.96,1.96,Inf),
+                    labels = c("Under","Correct","Over"))) %>% 
+  ggplot()+
+  aes(x = beta1,y = gama0)+
+  geom_tile(aes(fill = bias))
+
+list.of.plots <- data.for.bias.map %>% 
+  group_by(beta1,gama0) %>% 
+  nest() %>% 
+  mutate(plot = map(data, function(x,y) 
+    ggplot(x)+aes(x=beta1.bias)+geom_histogram())) %>% 
+  .$plot
+  
+
