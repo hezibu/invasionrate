@@ -81,6 +81,19 @@ count_lambda <- function(N,params,const){
   return(lambda)
 }
 
+get_p_component <- function(N,params,const){
+  # This function calculates lambda from Solow and Costello, 2004.
+  # params is a vector of parameters
+  lambda<-vector(mode = "numeric",length = N)
+  for(i in 1:N){
+    S=c(1:i)
+    Am = count_m(S,params,const) 
+    lambda[i] = sum(count_p(i,params,const))
+  }
+  
+  return(lambda)
+}
+
 sim <- function(N,params,const){
   # This function calculates lambda from Solow and Costello, 2004.
   # params is a vector of parameters
