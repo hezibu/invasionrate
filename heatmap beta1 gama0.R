@@ -157,11 +157,36 @@ data.for.bias.map %>%
   aes(x = beta1,y = gama0)+
   geom_tile(aes(fill = bias))
 
-list.of.plots <- data.for.bias.map %>% 
-  group_by(beta1,gama0) %>% 
-  nest() %>% 
-  mutate(plot = map(data, function(x,y) 
-    ggplot(x)+aes(x=beta1.bias)+geom_histogram())) %>% 
-  .$plot
-  
 
+data.for.bias.map %>% 
+  group_by(beta1,gama0) %>% 
+  summarize(under = sum(gama0.bias < -1.96,na.rm = T)/100) %>% 
+  ggplot()+
+  aes(x=beta1,y = gama0)+
+  geom_tile(aes(fill = under))
+
+
+data.for.bias.map %>% 
+  group_by(beta1,gama0) %>% 
+  summarize(over = sum(gama0.bias > 1.96,na.rm = T)/100) %>% 
+  ggplot()+
+  aes(x=beta1,y = gama0)+
+  geom_tile(aes(fill = over))
+
+
+data.for.bias.map %>% 
+  group_by(beta1,gama0) %>% 
+  summarize(over = sum(gama0.bias > 1.96,na.rm = T)/100) %>% 
+  ggplot()+
+  aes(x=beta1,y = over)+
+  geom_point()+geom_smooth(method = "lm")
+
+data.for.bias.map %>% 
+  mutate(beta = exp(beta0.bias + beta1.bias),
+         gamathing = (exp(gama0.bias + gama1.bias + gama2.bias)),
+         gama = gamathing/(1+gamathing)) %>% 
+  group_by(beta1,gama0) %>% 
+  summarize(cor = cor.test(beta,gama)[[4]]) %>% 
+  ggplot()+
+  aes(x=beta1,y = gama0)+
+  geom_tile(aes(fill = cor))

@@ -212,13 +212,78 @@ heatmap.result.dataframe$beta1correct[sapply(heatmap.result.dataframe$beta1corre
 heatmap.result.dataframe <- unnest(heatmap.result.dataframe,beta1correct)
 
 
+heatmap.result.dataframe %>% group_by(beta1,timespan) %>% 
+  summarize(correctrate = sum(beta1correct,na.rm = T)/100) %>%
+  mutate(binary = cut(correctrate,breaks = c(-Inf,0.85,0.95,1),
+                      labels = c("<0.85","0.85","0.95"))) %>% {
+                        ggplot(.)+
+                          aes(x=beta1,y=as.factor(timespan))+
+                          geom_tile(aes(fill=correctrate))
+                      }
+
 
 heatmap.result.dataframe %>% group_by(beta1,timespan) %>% 
-  summarize(correctrate = sum(beta1correct,na.rm = T)/100) %>%  {
+  summarize(correctrate = sum(beta1correct,na.rm = T)/100) %>%
+  mutate(binary = cut(correctrate,breaks = c(-Inf,0.85,0.95,1),
+                      labels = c("<0.85","0.85","0.95"))) %>% {
     ggplot(.)+
       aes(x=beta1,y=as.factor(timespan))+
-      geom_tile(aes(fill=correctrate))
+      geom_tile(aes(fill=binary))
   }
 
 
 
+
+
+
+
+
+index <- 1
+list.bias <- list()
+for (i in 1:31){
+  for (j in 1:4){
+    for (k in 1:100){
+      list.bias[[index]] <- try(silent = T,did_optim_succeed_high_low(params = set_params_to_optimize(c(-1,seq(-0.01,0.02,by = 0.0010)[i],-1,0,0)),
+                                                          timespan.heatmap.results.list %>% .[[i]] %>% .[[j]] %>% .[[k]]))
+      index <- index +1
+    }
+  }
+}
+
+timespa.beta0.bias <- purrr::map(list.bias,3) %>% map(1)
+timespa.beta1.bias <- purrr::map(list.bias,3) %>% map(2)
+timespa.gama0.bias <- purrr::map(list.bias,3) %>% map(3)
+timespa.gama1.bias <- purrr::map(list.bias,3) %>% map(4)
+timespa.gama2.bias <- purrr::map(list.bias,3) %>% map(5)
+
+timespan.beta1.true <- purrr::map(list.bias,2) %>% map(2)
+
+
+timespa.beta0.bias[sapply(timespa.beta0.bias,is.null)] <- NA
+timespa.beta1.bias[sapply(timespa.beta1.bias,is.null)] <- NA
+timespa.gama0.bias[sapply(timespa.gama0.bias,is.null)] <- NA
+timespa.gama1.bias[sapply(timespa.gama1.bias,is.null)] <- NA
+timespa.gama2.bias[sapply(timespa.gama2.bias,is.null)] <- NA
+timespan.beta1.true[sapply(timespan.beta1.true,is.null)] <- NA
+
+data.for.bias.map.ts <- tibble(beta1 = unlist(timespan.beta1.true),
+                               timespan = rep(timespan.intervals[c(1,4,6,10)],31*100),
+                            beta0.bias = unlist(timespa.beta0.bias),
+                            beta1.bias = unlist(timespa.beta1.bias),
+                            gama0.bias = unlist(timespa.gama0.bias),
+                            gama1.bias = unlist(timespa.gama1.bias),
+                            gama2.bias = unlist(timespa.gama2.bias))
+data.for.bias.map.ts %>% 
+  group_by(beta1,timespan) %>% 
+  summarize(under = sum(beta1.bias < -1.96,na.rm = T)/100) %>% 
+  ggplot()+
+  aes(x=beta1,y = as.factor(timespan))+
+  geom_tile(aes(fill = under))
+
+
+data.for.bias.map.ts %>% 
+  group_by(beta1,timespan) %>% 
+  summarize(over = sum(beta1.bias > 1.96,na.rm = T)/100) %>% 
+  ggplot()+
+  aes(x=beta1,y = as.factor(timespan))+
+  geom_tile(aes(fill = over))
