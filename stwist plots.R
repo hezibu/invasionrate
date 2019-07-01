@@ -1,3 +1,6 @@
+source("required packages.R")
+source("solow_costello_functions.R")
+
 get_plot_stwist <- function(taxon,taxon.params,timeframe = c(1900,2000)) {
   stwistdata <- read.csv("AlienSpecies_MultipleDBs_Masterfile_vs1.2.csv", sep=";", stringsAsFactors=FALSE)
   
@@ -22,11 +25,23 @@ get_plot_stwist <- function(taxon,taxon.params,timeframe = c(1900,2000)) {
            years.from.start = seq_along(first.record)-1)
   
   
-  
   taxon.timeseries <- taxon.timeseries.data$number.of.new.species
-
+  
+  
   taxon.model.output <- optim(fn = count_log_like,par = taxon.params,
-        first_record_data = taxon.timeseries, const = c(0),hessian = T)
+        first_record_data = taxon.timeseries, const = c(0),hessian = T,method = "BFGS")
+  
+  param.samps <- MASS::mvrnorm(n = 1000,mu = taxon.model.output$par,Sigma = solve(taxon.model.output$hessian),tol = 0.0001)
+  predictions <- apply(param.samps,1,function(par) cumsum(count_lambda(N = length(timeframe[1]:timeframe[2]),params = par,const = 0)))
+
+
+  predictions.sd <- apply(predictions,1,sd)
+  
+  
+  exponent.predictions <- apply(param.samps[,1:2],1,function(row) 
+    exp(row["beta0"]+row["beta1"]*(seq_along(timeframe[1]:timeframe[2]))))
+  
+  exp.predictions.sd <- apply(exponent.predictions,1,sd)
   
   linear.model <- lm(log(number.of.new.species+1) ~ years.from.start,
                      data = taxon.timeseries.data)
@@ -51,29 +66,39 @@ get_plot_stwist <- function(taxon,taxon.params,timeframe = c(1900,2000)) {
                        snc.exponent = exp(taxon.model.output$par["beta0"]+taxon.model.output$par["beta1"]*(seq_along(first.record)-1)))
 
   taxon.plot.data <- model.data %>% gather(2:5,key = group,value = num) %>%
-    group_by(group) %>% arrange(first.record) %>% mutate(cs = cumsum(num)) %>% dplyr::ungroup() %>% 
-    mutate(group,forcats::fct_relevel(group,c("observed","simple.exponent","snc.fit","snc.exponent")))
-
-
+    group_by(group) %>% arrange(first.record) %>% mutate(cs = cumsum(num)) %>% dplyr::ungroup() 
+  
   plot1 <- taxon.plot.data %>% 
-    filter(group %in% c("simple.exponent",'snc.exponent')) %>% 
+    select(first.record,group,num) %>% 
+    filter(group %in% c("simple.exponent",'snc.exponent')) %>%
     ggplot()+
-    aes(x  = first.record,y = num, group = group, linetype = group)+
-    geom_line(size = 1.5)+xlab("Year")+ylab("Yealy Number of Species")+
-    scale_linetype_discrete(labels = c("Observed Rate","Model Derived Rate"))
+    geom_line(aes(x  = first.record,y = num,linetype =group), size = 1.5)+
+    geom_ribbon(data = subset(test,group == "snc.exponent"),aes(x = first.record, 
+                                                                ymax = num + 1.96 * exp.predictions.sd,
+                                                                ymin = num - 1.96 * exp.predictions.sd),alpha = 0.2)+
+    xlab("Year")+ylab("Cummulative Number of Species")+
+    scale_linetype_discrete(labels = c("Observed","Model Fit"))+
+    theme_classic()+
+    theme(legend.title = element_blank(),legend.position = c(.15,.85))
   
   plot2 <- taxon.plot.data %>% 
+    select(first.record,group,cs) %>% 
     filter(group %in% c("observed",'snc.fit')) %>% 
     ggplot()+
-    aes(x  = first.record,y = cs, group = group, linetype = group)+
-    geom_line(size = 1.5)+xlab("Year")+ylab("Cummulative Number of Species")+
-    scale_linetype_discrete(labels = c("Observed","Model Fit"))
+    geom_line(aes(x  = first.record,y = cs,linetype =group), size = 1.5)+
+    geom_ribbon(data = subset(test,group == "snc.fit"),aes(x = first.record,
+                                                           ymax = cs + 1.96 * predictions.sd,
+                                                           ymin = cs - 1.96 * predictions.sd),alpha = 0.2)+
+    xlab("Year")+ylab("Cummulative Number of Species")+
+    scale_linetype_discrete(labels = c("Observed","Model Fit"))+
+    theme_classic()+
+    theme(legend.title = element_blank(),legend.position = c(.15,.85))
+    
   
   return(list(taxon.model.output,plot1,plot2))
 }
 
 
-
-get_plot_stwist("Birds",taxon.params = aves.params,
-                timeframe = c(1970,2000))
+birds <- get_plot_stwist("Birds",taxon.params = set_params_to_optimize(c(1,0.01,-1,0,0)),
+                timeframe = c(1800,2000))
 
