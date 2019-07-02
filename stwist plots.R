@@ -31,7 +31,7 @@ get_plot_stwist <- function(taxon,taxon.params,timeframe = c(1900,2000)) {
   taxon.model.output <- optim(fn = count_log_like,par = taxon.params,
         first_record_data = taxon.timeseries, const = c(0),hessian = T,method = "BFGS")
   
-  param.samps <- MASS::mvrnorm(n = 1000,mu = taxon.model.output$par,Sigma = solve(taxon.model.output$hessian),tol = 0.0001)
+  param.samps <- MASS::mvrnorm(n = 1000,mu = taxon.model.output$par,Sigma = solve(taxon.model.output$hessian),tol = 3.05)
   predictions <- apply(param.samps,1,function(par) cumsum(count_lambda(N = length(timeframe[1]:timeframe[2]),params = par,const = 0)))
 
 
@@ -73,10 +73,10 @@ get_plot_stwist <- function(taxon,taxon.params,timeframe = c(1900,2000)) {
     filter(group %in% c("simple.exponent",'snc.exponent')) %>%
     ggplot()+
     geom_line(aes(x  = first.record,y = num,linetype =group), size = 1.5)+
-    geom_ribbon(data = subset(test,group == "snc.exponent"),aes(x = first.record, 
+    geom_ribbon(data = subset(taxon.plot.data,group == "snc.exponent"),aes(x = first.record, 
                                                                 ymax = num + 1.96 * exp.predictions.sd,
                                                                 ymin = num - 1.96 * exp.predictions.sd),alpha = 0.2)+
-    xlab("Year")+ylab("Cummulative Number of Species")+
+    xlab("Year")+ylab("Yearly Number of Species")+
     scale_linetype_discrete(labels = c("Observed","Model Fit"))+
     theme_classic()+
     theme(legend.title = element_blank(),legend.position = c(.15,.85))
@@ -86,10 +86,10 @@ get_plot_stwist <- function(taxon,taxon.params,timeframe = c(1900,2000)) {
     filter(group %in% c("observed",'snc.fit')) %>% 
     ggplot()+
     geom_line(aes(x  = first.record,y = cs,linetype =group), size = 1.5)+
-    geom_ribbon(data = subset(test,group == "snc.fit"),aes(x = first.record,
+    geom_ribbon(data = subset(taxon.plot.data,group == "snc.fit"),aes(x = first.record,
                                                            ymax = cs + 1.96 * predictions.sd,
                                                            ymin = cs - 1.96 * predictions.sd),alpha = 0.2)+
-    xlab("Year")+ylab("Cummulative Number of Species")+
+    xlab("Year")+ylab("Cummulative Number of New Species")+
     scale_linetype_discrete(labels = c("Observed","Model Fit"))+
     theme_classic()+
     theme(legend.title = element_blank(),legend.position = c(.15,.85))
@@ -99,6 +99,17 @@ get_plot_stwist <- function(taxon,taxon.params,timeframe = c(1900,2000)) {
 }
 
 
-birds <- get_plot_stwist("Birds",taxon.params = set_params_to_optimize(c(1,0.01,-1,0,0)),
+birds3.05 <- get_plot_stwist("Birds",taxon.params = set_params_to_optimize(c(1,0.01,-1,0,0)),
                 timeframe = c(1800,2000))
+amphs <- get_plot_stwist("Amphibians",taxon.params = set_params_to_optimize(c(1,0.01,-1,0,0)),
+                         timeframe = c(1800,2000))
+plants <- get_plot_stwist("Vascular plants",taxon.params = set_params_to_optimize(c(1,0.01,-1,0,0)),
+                         timeframe = c(1800,2000))
 
+
+MASS::mvrnorm(n = 1000,mu = amphs$par,Sigma = solve(amphs$hessian),tol = 3.05)
+
+saveRDS(birds3.05,file = "birdsresultshightol")
+saveRDS(amphs,file = "amphsresults")
+saveRDS(birds,file = "birdsresults")
+saveRDS(plants,file = "plantsresults")
