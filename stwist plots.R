@@ -109,7 +109,36 @@ plants <- get_plot_stwist("Vascular plants",taxon.params = set_params_to_optimiz
 
 MASS::mvrnorm(n = 1000,mu = amphs$par,Sigma = solve(amphs$hessian),tol = 3.05)
 
-saveRDS(birds3.05,file = "birdsresultshightol")
-saveRDS(amphs,file = "amphsresults")
-saveRDS(birds,file = "birdsresults")
-saveRDS(plants,file = "plantsresults")
+# saveRDS(birds3.05,file = "birdsresultshightol")
+# saveRDS(amphs,file = "amphsresults")
+# saveRDS(birds,file = "birdsresults")
+# saveRDS(plants,file = "plantsresults")
+birds3.05 <- readRDS("birdsresultshightol")
+amphs <- readRDS("amphsresults")
+readRDS("birdsresults")
+plants <- readRDS("plantsresults")
+
+birds70 <- get_plot_stwist("Birds",taxon.params = set_params_to_optimize(c(1,0.01,-1,0,0)),
+                             timeframe = c(1970,2000))
+amphs70 <- get_plot_stwist("Amphibians",taxon.params = set_params_to_optimize(c(1,0.01,-1,0,0)),
+                         timeframe = c(1970,2000))
+plants70 <- get_plot_stwist("Vascular plants",taxon.params = set_params_to_optimize(c(1,0.01,-1,0,0)),
+                          timeframe = c(1970,2000))
+
+
+theme.for.plots <- theme(plot.title = element_text(size = 24),
+                         axis.title = element_text(size = 18),
+                         axis.text = element_text(size = 14),
+                         legend.position = "none")
+
+a <- birds3.05[[3]]+ggtitle("a")+theme.for.plots + annotate("text", label = "Birds", size = 8, x = 1820, y = 750)
+d <- birds70[[2]]+ggtitle("d")+theme.for.plots
+b <- plants[[3]]+ggtitle("b")+theme.for.plots + annotate("text", label = "Plants", size = 8, x = 1830, y = 5000)
+e <- plants70[[2]]+ggtitle("e")+theme.for.plots
+c <- amphs[[3]]+ggtitle("c")+theme.for.plots + annotate("text", label = "Amphibians", size = 8, x = 1850, y = 75)
+f <- amphs70[[2]]+ggtitle("f")+theme.for.plots 
+
+
+gridExtra::grid.arrange(a,d,
+                        b,e,
+                        c,f,ncol = 2)

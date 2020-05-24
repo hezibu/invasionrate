@@ -1,0 +1,23 @@
+#open quote
+model {
+
+for ( i in 1:N ) {
+logit_P[i]=a+b*t[i]
+P[i]=1/(1+exp(-logit_P[i]))  # <---------------logistic
+#P[i]=exp(-a*exp(-b*t[i]))    # <---------------Gompertz
+#P[i]=1-exp(-(a*t[i]^b))      # <---------------Weibull
+
+dI[i] ~ dbin(  P[i], dsps[i] )  # p first, then n
+
+res[i] = dI[i] - P[i]*dsps[i] # residual, pr*dsps is the mean
+dI.new[i] ~ dbin( P[i], dsps[i] ) 
+res.new[i] = dI.new[i] - P[i]*dsps[i]
+}
+
+fit <- sum(res[])
+fit.new <- sum(res.new[])
+a ~ dunif(-10,10)
+b ~ dnorm(0, 1) #dunif(-1, 1)
+
+}
+
