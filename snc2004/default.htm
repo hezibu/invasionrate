@@ -1,0 +1,130 @@
+<HTML>
+
+<HEAD>
+<TITLE>Ecological Archives E085-049-S1</TITLE>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-25913816-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+<h3><B><font face="Times New Roman, Times, serif">Andrew R. Solow and Christopher 
+  J. Costello. 2004. Estimating the rate of species introductions from the discovery 
+  record. <I>Ecology</I> 85:1822&#150;1825</font></B><font face="Times New Roman, Times, serif">.</font></h3>
+<hr>
+<H3><font face="Times New Roman, Times, serif">Supplement</font></H3>
+<BLOCKQUOTE> 
+  <h3><font face="Times New Roman, Times, serif">Matlab codes for running the 
+    maximum-likelihood estimation, data files for San Francisco, and simulated 
+    sighting records for the simulation exercise.<B> <I><br>
+    Ecological Archives</I> </B>E085-049-S1.<BR CLEAR="ALL">
+    </font></h3>
+</BLOCKQUOTE>
+<P><font face="Times New Roman, Times, serif"><a href="../../../copyright.htm"><b>Copyright</b></a></font></P>
+<HR ALIGN=LEFT>
+<blockquote> 
+  <h3><font face="Times New Roman, Times, serif"><B><a href="#anchorAuthors">Authors</a></B> 
+    <BR CLEAR="ALL">
+    <B><a href="#anchorFilelist">File list (downloadable)</a></B><BR CLEAR="ALL">
+    <B><a href="#anchorDescription" target="_self">Description</a></B><BR CLEAR="ALL">
+    </font></h3>
+</blockquote>
+<HR ALIGN=LEFT>
+<h3><font face="Times New Roman, Times, serif"><A
+
+NAME="anchorAuthors"></A><B>Author(s)</B></font></h3>
+<BLOCKQUOTE> 
+  <P><font face="Times New Roman, Times, serif">Andrew R. Solow<BR
+
+  CLEAR="ALL">
+    Marine Policy Center<br>
+    Woods Hole Oceanographic Institution<BR
+
+  CLEAR="ALL">
+    Woods Hole, MA 02543<br>
+    e-mail: asolow@whoi.edu</font></P>
+  <P><font face="Times New Roman, Times, serif">Christopher J. Costello<br
+
+  clear="ALL">
+    Donald Bren School of Environmental Science and Management<br>
+    University of California, Santa Barbara<br clear="ALL">
+    Santa Barbara, CA 93106<br clear="ALL">
+    e-mail: costello@bren.ucsb.edu</font></P>
+</BLOCKQUOTE>
+<HR ALIGN=LEFT>
+<h3><font face="Times New Roman, Times, serif"><a
+
+name="anchorFilelist"></a><B>File list</B></font></h3>
+<blockquote> 
+  <p style="line-height: 100%; margin-top: 0"><font face="Courier New, Courier, mono"><a
+  href="Count_Ecology_main.m">Count_Ecology_main.m</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - Main Matlab code for running the MLE</font>.<br>
+    <font face="Courier New, Courier, mono"><a
+  href="count_lambda.m">count_lambda.m</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - Matlab function file for calculating lambda.</font><br>
+    <font face="Courier New, Courier, mono"><a
+  href="count_log_like.m">count_log_like.m</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - Matlab function file for calculating the log-likelihood value.</font><br>
+    <font face="Courier New, Courier, mono"><a
+  href="count_m.m">count_m.m</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - Matlab function file for calculating m.</font><br>
+    <font face="Courier New, Courier, mono"><a
+  href="count_p.m">count_p.m</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - Matlab function file for calculating p.</font><br>
+    <font face="Courier New, Courier, mono"><a
+  href="count_pi.m">count_pi.m</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - Matlab function file for calculating pi.</font></p>
+  <p style="line-height: 100%; margin-top: 0"><font face="Courier New, Courier, mono"><a
+  href="NumDis.txt">NumDis.txt</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - Text file containing the number of discoveries by year in San Francisco 
+    from 1851&#150;1995.</font></p>
+  <p style="line-height: 100%; margin-top: 0"><font face="Courier New, Courier, mono"><a
+  href="P1data.txt">P1data.txt</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - 100 simulated sighting records for first set of parameters (rows are years, 
+    columns are sighting records).&nbsp;</font><br>
+    <font face="Courier New, Courier, mono"><a
+  href="P2data.txt">P2data.txt</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - 100 simulated sighting records for second set of parameters (rows are years, 
+    columns are sighting records).&nbsp;</font><br>
+    <font face="Courier New, Courier, mono"><a
+  href="P3data.txt">P3data.txt</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - 100 simulated sighting records for third set of parameters (rows are years, 
+    columns are sighting records).&nbsp;</font><br>
+    <font face="Courier New, Courier, mono"><a
+  href="P4data.txt">P4data.txt</a></font>&nbsp;<font face="Times New Roman, Times, serif"> 
+    - 100 simulated sighting records for fourth set of parameters (rows are years, 
+    columns are sighting records).&nbsp;</font></p>
+  <p style="line-height: 100%; margin-top: 0">&nbsp;</p>
+</blockquote>
+<p><font face="Times New Roman, Times, serif" size="+1"><b><a name="anchorDescription"></a>Description</b></font></p>
+<font face="Times New Roman, Times, serif">The main Matlab code (<font face="Courier New, Courier, mono">Count_Ecology_main.m</font>) 
+calls the remaining Matlab function files to run the maximum likelihood estimation 
+of the parameters of the introduction and discovery process.&nbsp;The text file 
+<font face="Courier New, Courier, mono">NumDis.txt</font> contains the data to 
+run the original analysis.&nbsp;The text files <font face="Courier New, Courier, mono">P1data.txt...P4data.txt</font> 
+contain the simulated sighting records over the 145 year sighting history (100 
+simulated sighting records for each of 4 parameter vectors, for a total of 400 
+independent 145-year sighting records).</font> 
+<HR>
+<font face="Times New Roman, Times, serif"><br>
+</font> 
+<p> 
+  <center>
+    <b><font size="+1"><font size="-2" face="Arial, Helvetica, sans-serif"><a href="../../../../esapubs/default.htm" target="_top">ESA 
+    Publications</a> | <a href="../../../default.htm" target="_top">Ecological 
+    Archives</a> | <a href="../../../copyright.htm" target="_self"> Permissions</a> 
+    | <a href="../../../citation.htm">Citation</a> | <a href="../../../contacts.htm"> 
+    Contacts</a></font></font></b> 
+  </center>
+</BODY>
+</HTML>
+
