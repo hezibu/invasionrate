@@ -3,10 +3,10 @@
 count_pi_const  <- function(S,i,params,const,pi1){
   
   pi0 <- ifelse(test = is.na(params["gama0"]),yes = as.numeric(const["gama0"]),no = as.numeric(params["gama0"]))
-  pi0 <- ifelse(test = is.na(params["gama0"]),yes = as.numeric(pi1[i]),no = as.numeric(params["gama0"]))
+  pi1 <- as.numeric(pi1[i])
   pi2 <- ifelse(test = is.na(params["gama2"]),yes = as.numeric(const["gama2"]),no = as.numeric(params["gama2"]))
   
-  num  <-  exp(pi0 + pi0 + pi2*exp(i-S))
+  num  <-  exp(pi0 + pi1 + pi2*exp(i-S))
   f <- is.infinite(num) # if the number is infinity
   pi_total <-  num/(1+num)
   
@@ -77,6 +77,21 @@ get_p_component_const <- function(N,params,const,pi1){
     S=c(1:i)
     Am = count_m(S,params,const) 
     lambda[i] = sum(count_p_const(i,params,const,pi1))
+  }
+  
+  return(lambda)
+}
+
+sim_random_p <- function(N,params,const){
+  # This function calculates lambda from Solow and Costello, 2004.
+  # params is a vector of parameters
+  lambda<-vector(mode = "numeric",length = N)
+  for(i in 1:N){
+    S=c(1:i)
+    Am = count_m(S,params,const) 
+    Ap = sample(seq(0,1,0.0001),1)
+    Yt = rbinom(Am,1,Ap)
+    lambda[i] = round(sum(Am * Conj(t(Yt))))
   }
   
   return(lambda)
